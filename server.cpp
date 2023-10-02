@@ -62,7 +62,7 @@ struct Conn{
     uint8_t wbuf[4 + k_max_msg];
 };
 
-static void conn_put(std::vector<Conn *> &fd2conn, Conn *conn){
+static void conn_put(std::vector<Conn *> &fd2conn, struct Conn *conn){
     if (fd2conn.size() <= (size_t) conn->fd){
         fd2conn.resize(conn->fd + 1);
     }
@@ -243,13 +243,12 @@ static bool try_one_request(Conn *conn){
     wlen += 4;
     //generating echoing response
     memcpy(&conn->wbuf[0], &wlen, 4);
-    memcpy(&conn->wbuf[0], &rescode, 4);
+    memcpy(&conn->wbuf[4], &rescode, 4);
     conn -> wbuf_size = 4+ wlen;
 
     //remove the request from the buffer
     //note: frequent memmove is inefficient
     size_t remain = conn -> rbuf_size -4 -len;
-
     if (remain){
         memmove(conn->rbuf, &conn -> rbuf[4+len], remain);
     } 
@@ -429,8 +428,6 @@ int main(){
         if (poll_args[0].revents){
             (void) accept_new_conn(fd2conn, fd);
         }
-
-        
     }
     return 0;
 }
