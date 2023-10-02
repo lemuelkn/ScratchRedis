@@ -66,6 +66,8 @@ static int32_t send_req(int fd, const std::vector<std::string> &cmd){
 
     char wbuf[4 + k_max_msg];
     memcpy(&wbuf[0], &len, 4);
+    uint32_t n = cmd.size();
+    memcpy(&wbuf[4], &n, 4);
     size_t cur = 8;
 
     for(const std::string &s : cmd){
@@ -112,11 +114,10 @@ static int32_t read_res(int fd) {
         msg("bad response");
         return -1;
     }
+
     memcpy(&rescode, &rbuf[4], 4);
     printf("server says: [%u] %.*s\n", rescode, len - 4, &rbuf[8]);
     return 0;
-
-
 }
 
 int main(int argc, char **argv){
